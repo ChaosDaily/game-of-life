@@ -11,11 +11,128 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Cell {
+    Dead = 0,
+    Alive = 1,
 }
 
 #[wasm_bindgen]
-pub fn greet(name: &str) {
-    alert(format!("I'VE SEEN THINGS YOU {} WOULDN'T BELIEVE.", name).as_str());
+pub struct Universe {
+    width: u32,
+    height: u32,
+    cells: Vec<Cell>,
+}
+
+impl Universe {
+    /// helper function to get index of cell
+    fn get_index(&self, row: u32, column: u32) -> usize {
+        (row * self.width + column) as usize
+    }
+
+    // count how many neighbor alive
+    fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
+        let mut count = 0;
+        // modulo to cycle
+        for delta_row in [self.height - 1, 0, 1].iter().cloned() {
+            for delta_col in [self.width - 1, 0, 1].iter().cloned() {
+                // skip cell cell itself
+                if delta_col == 0 && delta_row == 0 {
+                    continue;
+                }
+
+                let neighbor_row = (row + delta_row) % self.height;
+                let neighbor_col = (column + delta_col) % self.width;
+                let idx = self.get_index(neighbor_row, neighbor_col);
+                count += self.cells[idx] as u8;
+            }
+        }
+        count
+    }
+}
+
+// export methods to JS
+#[wasm_bindgen]
+impl Universe {
+    pub fn new() -> Universe {
+        let width = 64;
+        let height = 64;
+
+        // initializes with some pattern
+        let cells = (0..width * height)
+            .map(|i| {
+                if i % 2 == 0 || i % 7 == 0 {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+            })
+            .collect();
+
+        Universe {
+            width,
+            height,
+            cells,
+        }
+    }
+
+    pub fn render(&self) -> String {
+        self.to_string()
+    }
+
+    pub fn tick(&mut self) {
+        let mut next = self.cells.clone();
+
+        for row in 0..self.height {
+            for col in 0..self.width {
+                let idx = self.get_index(row, col);
+                let cell = self.cells[idx];
+                let live_neighbors = self.live_neighbor_count(row, col);
+
+                let next_cell = match (cell, live_neighbors) {
+                    // Rule: alive cell dies if neighbors fewer than 2
+                    (Cell::Alive, x) if x < 2 => Cell::Dead,
+                    // Rule: alive cell keep alive when neighbors is 2 or 3
+                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
+                    // Rule: alive cell dies if neighbors more than 3
+                    (Cell::Alive, x) if x > 3 => Cell::Dead,
+                    // Rule: dead cell reborn when neighbors is 3
+                    (Cell::Dead, 3) => Cell::Alive,
+                    // remain the same
+                    (otherwise, _) => otherwise,
+                };
+
+                next[idx] = next_cell;
+            }
+        }
+        self.cells = next;
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    pub fn cells(&self) -> *const Cell {
+        self.cells.as_ptr()
+    }
+}
+
+impl fmt::Display for Universe {
+    // print cells state line by line
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // extract each row
+        for line in self.cells.as_slice().chunks(self.width as usize) {
+            for &cell in line {
+                let symbol = if cell == Cell::Dead { '◻' } else { '◼' };
+                write!(f, "{}", symbol)?;
+            }
+            write!(f, "\n")?;
+        }
+        Ok(())
+    }
 }
