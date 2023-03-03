@@ -76,10 +76,36 @@ js code
     * improve with bitmap
 
 
-### TODO
+## Testing
+
+1. export getter and setter
+2. more helper function
+3. write test: `tests/web.rs`
+4. test generated wasm: `wasm-pack test [--chrome|--firefox|--node]`
+
+
+## TODO
+
+https://rustwasm.github.io/docs/book/game-of-life/testing.html
 
 - improve with [hashlife algo](https://en.wikipedia.org/wiki/Hashlife)
 - multi rule
-- insight js code
 - dragon curve
+
+
+## Exercises
+
+- Add some random pattern: to run it in js. you should use `js-sys` crate
+- Improve with bitmap
+    * `fixedbitset` crate
+        + set: `cells.set(idx, bool)`, get: `cells[idx]`
+
+
+
+
+
+
+
+
+
 
