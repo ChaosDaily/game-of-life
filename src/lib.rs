@@ -25,6 +25,15 @@ pub struct Universe {
     cells: Vec<Cell>,
 }
 
+impl Cell {
+    fn toggle(&mut self) {
+        *self = match *self {
+            Cell::Dead => Cell::Alive,
+            Cell::Alive => Cell::Dead,
+        };
+    }
+}
+
 impl Universe {
     /// helper function to get index of cell
     fn get_index(&self, row: u32, column: u32) -> usize {
@@ -63,7 +72,6 @@ impl Universe {
             self.cells[idx] = Cell::Alive;
         }
     }
-
 }
 
 // export methods to JS
@@ -83,6 +91,20 @@ impl Universe {
                 }
             })
             .collect();
+
+        Universe {
+            width,
+            height,
+            cells,
+        }
+    }
+
+    pub fn empty() -> Universe {
+        let width = 64;
+        let height = 64;
+
+        // initializes with some pattern
+        let cells = (0..width * height).map(|_i| Cell::Dead).collect();
 
         Universe {
             width,
@@ -145,6 +167,11 @@ impl Universe {
 
     pub fn cells(&self) -> *const Cell {
         self.cells.as_ptr()
+    }
+
+    pub fn toggle_cell(&mut self, row: u32, column: u32) {
+        let idx = self.get_index(row, column);
+        self.cells[idx].toggle();
     }
 }
 

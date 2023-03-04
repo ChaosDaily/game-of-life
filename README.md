@@ -76,6 +76,22 @@ js code
     * improve with bitmap
 
 
+#### Adding interactivity
+
+pause and resume
+
+1. add `<button>`
+2. get `<button>` DOM and add event
+3. resume event continue draw and tick
+3. pause event `cancelAnimationFrame(animationId)`
+
+draw by hand
+
+1. add toggle logic of cell in rust code
+2. compute row and col relative to canvas
+3. toggle
+
+
 ## Testing
 
 1. export getter and setter
@@ -83,6 +99,10 @@ js code
 3. write test: `tests/web.rs`
 4. test generated wasm: `wasm-pack test [--chrome|--firefox|--node]`
 
+
+## Debug
+
+TODO: debug wasm in browser
 
 ## TODO
 
@@ -99,6 +119,9 @@ https://rustwasm.github.io/docs/book/game-of-life/testing.html
 - Improve with bitmap
     * `fixedbitset` crate
         + set: `cells.set(idx, bool)`, get: `cells[idx]`
+- `<input type="range">` to control how many ticks per frame
+- `<button>` to reset whole world or generate random world
+- `ctrl + click` to generate glider and `shift + click` to generate pular
 
 
 

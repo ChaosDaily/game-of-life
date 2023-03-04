@@ -19,12 +19,15 @@ canvas.width = (CELL_SIZE + 1) * width + 1;
 
 const ctx = canvas.getContext('2d');
 
+// Null if is running
+let animationId = null;
+
 const renderLoop = () => {
+  universe.tick();
   drawGrid();
   drawCells();
 
-  universe.tick();
-  requestAnimationFrame(renderLoop);
+  animationId = requestAnimationFrame(renderLoop);
 };
 
 // Draw the grid which simple just lines criss-cross
@@ -81,5 +84,50 @@ const drawCells = () => {
   ctx.stroke();
 };
 
+const isPause = () => {
+  return animationId === null;
+};
+
+const playPauseButton = document.getElementById("play-pause");
+
+const play = () => {
+  playPauseButton.textContent = "⏸";
+  renderLoop();
+}
+
+const pause = () => {
+  playPauseButton.textContent = "▶";
+  cancelAnimationFrame(animationId);
+  animationId = null;
+};
+
+
+playPauseButton.addEventListener("click", event = () => {
+  if (isPause()) {
+	play();
+  } else {
+	pause();
+  }
+});
+
+canvas.addEventListener("click", event => {
+  const boundingRact = canvas.getBoundingClientRect();
+
+  // translate page-relative to canvas-relative
+  const scaleX = canvas.width / boundingRact.width;
+  const scaleY = canvas.height / boundingRact.height;
+
+  const canvasLeft = (event.clientX - boundingRact.left) * scaleX;
+  const canvasTop = (event.clientY - boundingRact.top) * scaleY;
+
+  const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + 1)), height - 1);
+  const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), width - 1);
+
+  universe.toggle_cell(row, col);
+
+  drawGrid();
+  drawCells();
+});
+
 // Start draw
-requestAnimationFrame(renderLoop);
+play();
