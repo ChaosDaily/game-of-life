@@ -1,5 +1,5 @@
 import { memory } from "game-of-life/game_of_life_bg"
-import { Universe, Cell } from "game-of-life";
+import { Universe } from "game-of-life";
 
 // How to draw each cell
 const CELL_SIZE = 5; // px
@@ -8,7 +8,7 @@ const DEAD_COLOR = "#FFFFFF";
 const ALIVE_COLOR = "#000000";
 
 // Construct and get universe data
-const universe = Universe.new();
+const universe = Universe.empty();
 const width = universe.width();
 const height = universe.height();
 
@@ -33,6 +33,10 @@ const renderLoop = () => {
   animationId = requestAnimationFrame(renderLoop);
 };
 
+const getIndex = (row, column) => {
+  return row * width + column;
+};
+
 // Draw the grid which simple just lines criss-cross
 const drawGrid = () => {
   ctx.beginPath();
@@ -53,15 +57,20 @@ const drawGrid = () => {
   ctx.stroke();
 };
 
-const getIndex = (row, column) => {
-  return row * width + column;
+// Check if bit in bitmap is set
+const bitIsSet = (n, arr) => {
+  // Wasm return an array of u32
+  const byte = Math.floor(n / 8);
+  const mask = 1 << (n % 8);
+  return (arr[byte] & mask) === mask;
 };
 
 
 // Access wasm linear memory and construct as Uint8Array
 const drawCells = () => {
   const cellsPtr = universe.cells();
-  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+  // wasm return bitmap as array of u32
+  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height / 8);
 
   ctx.beginPath();
 
@@ -73,7 +82,7 @@ const drawCells = () => {
   for (let row = 0; row < height; row++) {
 	for (let col = 0; col < width; col++) {
 	  const idx = getIndex(row, col);
-	  if (cells[idx] !== Cell.Alive) {
+	  if (!bitIsSet(idx, cells)) {
 		continue;
 	  }
 
@@ -92,7 +101,7 @@ const drawCells = () => {
   for (let row = 0; row < height; row++) {
 	for (let col = 0; col < width; col++) {
 	  const idx = getIndex(row, col);
-	  if (cells[idx] !== Cell.Dead) {
+	  if (bitIsSet(idx, cells)) {
 		continue;
 	  }
 
