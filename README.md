@@ -104,6 +104,27 @@ draw by hand
 
 TODO: debug wasm in browser
 
+
+## Time Profiling
+
+1. JS: Record timestamp for each frame so that we can calculate FPS
+2. Rust: measure how long `Universe::tick` takes
+    - web-sys crate, enable console feature
+    - RAII timer per tick in rust so that it can print in the console of browser
+
+found that **change fillStyle is expensive**. So we can draw Alive Cell first and then Dead Cell.
+
+Rust bench
+
+1. Install [cargo benchcmp](https://github.com/BurntSushi/cargo-benchcmp) tool
+2. Write micro-bench in `benches/bench.rs` path
+3. **Comment `#[wasm_bindgen]`** to generate native code for bench
+4. Run `cargo bench | tee before.txt` to tell where the binary is
+5. Perf it
+
+And we found that the `%` operator is expensive in counting neighbors in our case
+
+
 ## TODO
 
 https://rustwasm.github.io/docs/book/game-of-life/testing.html
@@ -122,6 +143,8 @@ https://rustwasm.github.io/docs/book/game-of-life/testing.html
 - `<input type="range">` to control how many ticks per frame
 - `<button>` to reset whole world or generate random world
 - `ctrl + click` to generate glider and `shift + click` to generate pular
+- Double buffer for cells. Since free and reallocate is expensive
+- Implement delta based design: Rust return a list of cells that changed
 
 
 
