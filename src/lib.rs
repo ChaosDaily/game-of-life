@@ -20,18 +20,18 @@ pub struct Universe {
 }
 
 impl Universe {
-    /// helper function to get index of cell
+    /// Helper function to get index of cell.
     fn get_index(&self, row: u32, column: u32) -> usize {
         (row * self.width + column) as usize
     }
 
-    // count how many neighbor alive
+    /// Count how many neighbor alive.
     fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
         let mut count = 0;
-        // modulo to cycle
+        // Modulo to cycle.
         for delta_row in [self.height - 1, 0, 1].iter().cloned() {
             for delta_col in [self.width - 1, 0, 1].iter().cloned() {
-                // skip cell cell itself
+                // Skip current cell itself.
                 if delta_col == 0 && delta_row == 0 {
                     continue;
                 }
@@ -45,12 +45,12 @@ impl Universe {
         count
     }
 
-    /// Get all cells
+    /// Get all cells.
     pub fn get_cells(&self) -> &FixedBitSet {
         &self.cells
     }
 
-    /// Set cells to be alive by passing (row, column)
+    /// Set cells to be alive by passing (row, column).
     pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
         for (row, col) in cells.iter().cloned() {
             let idx = self.get_index(row, col);
@@ -59,10 +59,10 @@ impl Universe {
     }
 }
 
-// export methods to JS
+// methods exported to JS.
 #[wasm_bindgen]
 impl Universe {
-    /// Initializes with fixed pattern
+    /// Initializes with fixed pattern.
     pub fn new() -> Universe {
         let width = 64;
         let height = 64;
@@ -80,7 +80,7 @@ impl Universe {
         }
     }
 
-    /// Initializes with random pattern
+    /// Initializes with random pattern.
     pub fn new_random(width: u32, height: u32) -> Universe {
         let size = (width * height) as usize;
 
@@ -96,13 +96,13 @@ impl Universe {
         }
     }
 
-    /// Initializes with empty pattern
+    /// Initializes with empty pattern.
     pub fn empty() -> Universe {
         let width = 64;
         let height = 64;
 
         let size = (width * height) as usize;
-        let mut cells = FixedBitSet::with_capacity(size);
+        let cells = FixedBitSet::with_capacity(size);
 
         Universe {
             width,
@@ -126,15 +126,15 @@ impl Universe {
                 let live_neighbors = self.live_neighbor_count(row, col);
 
                 let next_cell = match (cell, live_neighbors) {
-                    // Rule: alive cell dies if neighbors fewer than 2
+                    // Rule: alive cell dies if neighbors fewer than 2.
                     (true, x) if x < 2 => false,
-                    // Rule: alive cell keep alive when neighbors is 2 or 3
+                    // Rule: alive cell keep alive when neighbors is 2 or 3.
                     (true, 2) | (true, 3) => true,
-                    // Rule: alive cell dies if neighbors more than 3
+                    // Rule: alive cell dies if neighbors more than 3.
                     (true, x) if x > 3 => false,
-                    // Rule: dead cell reborn when neighbors is 3
+                    // Rule: dead cell reborn when neighbors is 3.
                     (false, 3) => true,
-                    // remain the same
+                    // Remain the same.
                     (otherwise, _) => otherwise,
                 };
 
@@ -144,13 +144,13 @@ impl Universe {
         self.cells = next;
     }
 
-    /// Set width and set all cells to dead
+    /// Set width and set all cells to dead.
     pub fn set_width(&mut self, width: u32) {
         self.width = width;
         self.cells = FixedBitSet::with_capacity((self.width * self.height) as usize);
     }
 
-    /// Set height and set all cells to dead
+    /// Set height and set all cells to dead.
     pub fn set_height(&mut self, height: u32) {
         self.height = height;
         self.cells = FixedBitSet::with_capacity((self.width * self.height) as usize);
@@ -175,9 +175,9 @@ impl Universe {
 }
 
 impl fmt::Display for Universe {
-    // print cells state line by line
+    /// Print cells state line by line.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // extract each row
+        // Extract each row.
         for row in 0..self.height {
             for col in 0..self.width {
                 let idx = self.get_index(row, col);
@@ -194,6 +194,8 @@ pub struct Timer<'a> {
 }
 
 impl<'a> Timer<'a> {
+    /// Start a timer using RAII method, 
+    /// which print the time elapsed at the end of life.
     pub fn new(name: &'a str) -> Timer<'a> {
         console::time_with_label(name);
         Timer { name }
@@ -201,6 +203,8 @@ impl<'a> Timer<'a> {
 }
 
 impl<'a> Drop for Timer<'a> {
+    /// End the timer automatically when object out of scope.
+    /// And print time elapsed in the browser console.
     fn drop(&mut self) {
         console::time_end_with_label(self.name);
     }
