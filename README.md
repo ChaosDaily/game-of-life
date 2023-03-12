@@ -147,7 +147,7 @@ https://rustwasm.github.io/docs/book/game-of-life/testing.html
 - [x] `ctrl + click` to generate glider and `shift + click` to generate pular
 
 - `<input type="range">` to control how many ticks per frame
-- `<button>` to reset whole world or generate random world
+- [x] `<button>` to reset whole world or generate random world
 - Double buffer for cells. Since free and reallocate is expensive
 - Implement delta based design: Rust return a list of cells that changed
 
