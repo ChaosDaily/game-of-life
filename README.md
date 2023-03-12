@@ -125,6 +125,10 @@ Rust bench
 And we found that the `%` operator is expensive in counting neighbors in our case
 
 
+## Shrinking wasm size
+
+[Optimizing Builds for Code Size](https://rustwasm.github.io/docs/book/reference/code-size.html#optimizing-builds-for-code-size)
+
 ## TODO
 
 https://rustwasm.github.io/docs/book/game-of-life/testing.html
@@ -136,13 +140,14 @@ https://rustwasm.github.io/docs/book/game-of-life/testing.html
 
 ## Exercises
 
-- Add some random pattern: to run it in js. you should use `js-sys` crate
-- Improve with bitmap
+- [x] Add some random pattern: to run it in js. you should use `js-sys` crate
+- [x] Improve with bitmap
     * `fixedbitset` crate
         + set: `cells.set(idx, bool)`, get: `cells[idx]`
+- [x] `ctrl + click` to generate glider and `shift + click` to generate pular
+
 - `<input type="range">` to control how many ticks per frame
-- `<button>` to reset whole world or generate random world
-- `ctrl + click` to generate glider and `shift + click` to generate pular
+- [x] `<button>` to reset whole world or generate random world
 - Double buffer for cells. Since free and reallocate is expensive
 - Implement delta based design: Rust return a list of cells that changed
 

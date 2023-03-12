@@ -8,7 +8,7 @@ const DEAD_COLOR = "#FFFFFF";
 const ALIVE_COLOR = "#000000";
 
 // Construct and get universe data.
-const universe = Universe.new_random();
+var universe = Universe.new_random(64, 64);
 const width = universe.width();
 const height = universe.height();
 
@@ -144,7 +144,21 @@ playPauseButton.addEventListener("click", event = () => {
   }
 });
 
-canvas.addEventListener("click", event => {
+const clearButtom = document.getElementById("b-reset");
+
+clearButtom.textContent = "clear";
+clearButtom.addEventListener("click", event = () => {
+  universe = Universe.empty();
+});
+
+const randomButton = document.getElementById("b-random");
+
+randomButton.textContent = "random";
+randomButton.addEventListener("click", event = () => {
+  universe = Universe.new_random(64, 64);
+});
+
+canvas.addEventListener("click", event = (event) => {
   const boundingRact = canvas.getBoundingClientRect();
 
   // Translate page-relative to canvas-relative.
@@ -157,7 +171,16 @@ canvas.addEventListener("click", event => {
   const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + 1)), height - 1);
   const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), width - 1);
 
-  universe.toggle_cell(row, col);
+  if (event.shiftKey === true) {
+	// Shift + Click to draw a pular
+	universe.draw_pular(row, col);
+  } else if (event.ctrlKey === true) {
+	// Ctrl + Click to draw a pular
+	universe.draw_glider(row, col);
+  } else {
+	// Otherwise toggle cell
+	universe.toggle_cell(row, col);
+  }
 
   drawGrid();
   drawCells();
